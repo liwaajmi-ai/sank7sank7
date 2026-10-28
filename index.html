@@ -1,0 +1,500 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIWA PREDICT ⚽</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #080d16;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  text-align: center;
+  padding: 35px 15px 25px;
+  background: linear-gradient(135deg, #101d32, #07100d);
+  border-bottom: 1px solid #263447;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 30px;
+  letter-spacing: 2px;
+}
+
+header h1 span {
+  color: #39e58c;
+}
+
+header p {
+  color: #9eacbf;
+  font-size: 14px;
+}
+
+.container {
+  max-width: 650px;
+  margin: auto;
+  padding: 20px 14px;
+}
+
+.notice {
+  background: #12241c;
+  color: #76f3ad;
+  border: 1px solid #24543a;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+label {
+  display: block;
+  color: #aab8ca;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+input {
+  width: 100%;
+  background: #101a29;
+  border: 1px solid #2b3b50;
+  border-radius: 9px;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  outline: none;
+}
+
+input:focus {
+  border-color: #39e58c;
+}
+
+.name-box {
+  margin-bottom: 22px;
+}
+
+.match {
+  background: #111a29;
+  border: 1px solid #26374d;
+  border-radius: 14px;
+  padding: 17px 12px;
+  margin-bottom: 14px;
+}
+
+.match-number {
+  color: #39e58c;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+}
+
+.teams {
+  display: grid;
+  grid-template-columns: 1fr 100px 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.team img {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+}
+
+.score {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.score input {
+  width: 42px;
+  height: 45px;
+  text-align: center;
+  padding: 4px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.score span {
+  color: #72849b;
+}
+
+.submit-btn {
+  width: 100%;
+  border: none;
+  background: #39e58c;
+  color: #06130b;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.submit-btn:hover {
+  background: #65f5a8;
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.footer {
+  text-align: center;
+  color: #68788e;
+  font-size: 12px;
+  padding: 25px;
+}
+
+#message {
+  text-align: center;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 10px;
+  display: none;
+}
+
+.success {
+  background: #122b1e;
+  color: #70f5a6;
+}
+
+.error {
+  background: #351919;
+  color: #ff9999;
+}
+
+@media (max-width: 400px) {
+  .teams {
+    grid-template-columns: 1fr 90px 1fr;
+  }
+
+  .team img {
+    width: 45px;
+    height: 45px;
+  }
+
+  .team {
+    font-size: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>LIWA <span>PREDICT</span> ⚽</h1>
+  <p>Predict the scores. Beat your friends.</p>
+</header>
+
+<div class="container">
+
+  <div class="notice">
+    ⚡ Make your predictions before kickoff!
+    One submission per browser.
+  </div>
+
+  <form id="predictionForm">
+
+    <div class="name-box">
+      <label for="playerName">YOUR NAME</label>
+      <input
+        id="playerName"
+        type="text"
+        placeholder="Enter your name"
+        maxlength="40"
+        required
+      >
+    </div>
+
+    <div id="matches"></div>
+
+    <button class="submit-btn" id="submitBtn" type="submit">
+      SUBMIT MY PREDICTIONS ⚽
+    </button>
+
+    <div id="message"></div>
+
+  </form>
+</div>
+
+<div class="footer">
+  LIWA PREDICT • Football Prediction League
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<script>
+
+// ========================================
+// EMAILJS CONFIGURATION
+// Add your EmailJS details here.
+// ========================================
+
+const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY";
+const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID";
+const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
+
+// ========================================
+// MATCHES
+// ========================================
+
+const matches = [
+  {
+    home: "Brighton",
+    away: "Man City",
+    homeLogo: "331",
+    awayLogo: "382"
+  },
+  {
+    home: "Liverpool",
+    away: "Chelsea",
+    homeLogo: "364",
+    awayLogo: "363"
+  },
+  {
+    home: "Juventus",
+    away: "Genoa",
+    homeLogo: "111",
+    awayLogo: "326"
+  },
+  {
+    home: "Real Madrid",
+    away: "Racing Santander",
+    homeLogo: "86",
+    awayLogo: "178"
+  },
+  {
+    home: "Barcelona",
+    away: "Alaves",
+    homeLogo: "83",
+    awayLogo: "263"
+  },
+  {
+    home: "Al Nassr",
+    away: "Al Kholood",
+    homeLogo: "817",
+    awayLogo: "102"
+  }
+];
+
+// ========================================
+// DISPLAY MATCHES
+// ========================================
+
+const matchesContainer = document.getElementById("matches");
+
+matches.forEach((match, index) => {
+
+  const card = document.createElement("div");
+  card.className = "match";
+
+  card.innerHTML = `
+    <div class="match-number">
+      MATCH ${index + 1}
+    </div>
+
+    <div class="teams">
+
+      <div class="team">
+        <img
+          src="https://a.espncdn.com/i/teamlogos/soccer/500/${match.homeLogo}.png"
+          alt="${match.home}"
+          onerror="this.style.display='none'"
+        >
+        <span>${match.home}</span>
+      </div>
+
+      <div class="score">
+        <input
+          type="number"
+          min="0"
+          max="99"
+          name="home${index}"
+          placeholder="0"
+          aria-label="${match.home} score"
+          required
+        >
+
+        <span>:</span>
+
+        <input
+          type="number"
+          min="0"
+          max="99"
+          name="away${index}"
+          placeholder="0"
+          aria-label="${match.away} score"
+          required
+        >
+      </div>
+
+      <div class="team">
+        <img
+          src="https://a.espncdn.com/i/teamlogos/soccer/500/${match.awayLogo}.png"
+          alt="${match.away}"
+          onerror="this.style.display='none'"
+        >
+        <span>${match.away}</span>
+      </div>
+
+    </div>
+  `;
+
+  matchesContainer.appendChild(card);
+
+});
+
+// ========================================
+// ONE SUBMISSION PER BROWSER
+// ========================================
+
+const STORAGE_KEY = "liwa_predict_submitted";
+
+const form = document.getElementById("predictionForm");
+const submitBtn = document.getElementById("submitBtn");
+const message = document.getElementById("message");
+
+function showMessage(text, type) {
+  message.textContent = text;
+  message.className = type;
+  message.style.display = "block";
+}
+
+if (localStorage.getItem(STORAGE_KEY)) {
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "ALREADY SUBMITTED";
+
+  showMessage(
+    "You have already submitted your predictions on this browser.",
+    "success"
+  );
+
+}
+
+// ========================================
+// SUBMIT PREDICTIONS
+// ========================================
+
+form.addEventListener("submit", async function(event) {
+
+  event.preventDefault();
+
+  if (localStorage.getItem(STORAGE_KEY)) {
+    showMessage(
+      "You have already submitted your predictions.",
+      "error"
+    );
+    return;
+  }
+
+  if (
+    EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY" ||
+    EMAILJS_SERVICE_ID === "YOUR_SERVICE_ID" ||
+    EMAILJS_TEMPLATE_ID === "YOUR_TEMPLATE_ID"
+  ) {
+    showMessage(
+      "Email is not configured yet. Ask the website owner to finish setup.",
+      "error"
+    );
+    return;
+  }
+
+  const playerName = document.getElementById("playerName").value.trim();
+
+  if (!playerName) {
+    showMessage("Please enter your name.", "error");
+    return;
+  }
+
+  let predictions = [];
+
+  matches.forEach((match, index) => {
+
+    const homeScore = document.querySelector(
+      `[name="home${index}"]`
+    ).value;
+
+    const awayScore = document.querySelector(
+      `[name="away${index}"]`
+    ).value;
+
+    predictions.push(
+      `${match.home} ${homeScore} - ${awayScore} ${match.away}`
+    );
+
+  });
+
+  const emailContent = predictions.join("\n");
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "SENDING...";
+
+  try {
+
+    await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      {
+        player_name: playerName,
+        predictions: emailContent,
+        reply_to: "liwaajmi3@gmail.com"
+      }
+    );
+
+    localStorage.setItem(STORAGE_KEY, "true");
+
+    showMessage(
+      "Your predictions have been submitted successfully! Good luck ⚽",
+      "success"
+    );
+
+    submitBtn.textContent = "PREDICTIONS SUBMITTED ✓";
+
+  } catch (error) {
+
+    console.error(error);
+
+    showMessage(
+      "Something went wrong. Please try again.",
+      "error"
+    );
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = "SUBMIT MY PREDICTIONS ⚽";
+
+  }
+
+});
+
+</script>
+
+</body>
+</html>
